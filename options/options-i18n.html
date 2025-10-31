@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title data-i18n="options.title">SafeGuard Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1 data-i18n="options.title">🛡️ SafeGuard Settings</h1>
+      <p class="subtitle" data-i18n="options.subtitle">Configure your smart content moderation preferences</p>
+    </header>
+    
+    <main class="main-content">
+      <!-- 语言设置 - 放在最前面 -->
+      <section class="settings-section">
+        <h2 data-i18n="options.language">🌍 Language Settings</h2>
+        <div class="form-group">
+          <label for="language-select" data-i18n="options.selectLanguage">Select Language</label>
+          <select id="language-select">
+            <option value="en" data-i18n-value="options.languageEnglish">English</option>
+            <option value="zh" data-i18n-value="options.languageChinese">简体中文</option>
+          </select>
+        </div>
+      </section>
+
+      <!-- 文本检测配置 -->
+      <section class="settings-section">
+        <h2 data-i18n="options.textDetection">📝 Text Detection Configuration</h2>
+        
+        <div class="form-group">
+          <label for="text-provider" data-i18n="options.textProvider">Select Text Detection Provider</label>
+          <select id="text-provider">
+            <option value="gemini" data-i18n-value="options.providerGemini">Google Gemini (Recommended)</option>
+            <option value="deepseek" data-i18n-value="options.providerDeepSeek">DeepSeek (Cost-effective)</option>
+            <option value="qwen" data-i18n-value="options.providerQwen">Qwen</option>
+          </select>
+        </div>
+        
+        <!-- Gemini 文本配置 -->
+        <div id="text-gemini-config" class="provider-config-inline">
+          <div class="form-group">
+            <label for="gemini-api-key">Gemini <span data-i18n="options.apiKey">API Key</span> <span class="required">*</span></label>
+            <input type="password" id="gemini-api-key" data-i18n-placeholder="options.apiKeyPlaceholder" placeholder="AIza...">
+            <small class="help-text">
+              <span data-i18n="options.getApiKey">Get</span>: <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a>
+            </small>
+          </div>
+          <div class="form-group">
+            <label for="gemini-text-model" data-i18n="options.textModel">Text Model</label>
+            <select id="gemini-text-model">
+              <option value="gemini-2.5-flash" selected data-i18n-value="options.geminiRecommended">gemini-2.5-flash (Recommended)</option>
+              <option value="gemini-2.0-flash">gemini-2.0-flash</option>
+              <option value="gemini-1.5-pro" data-i18n-value="options.geminiPro">gemini-1.5-pro (More Powerful)</option>
+            </select>
+          </div>
+          <div id="gemini-text-status" class="api-status"></div>
+        </div>
+        
+        <!-- DeepSeek 文本配置 -->
+        <div id="text-deepseek-config" class="provider-config-inline" style="display: none;">
+          <div class="form-group">
+            <label for="deepseek-api-key">DeepSeek <span data-i18n="options.apiKey">API Key</span> <span class="required">*</span></label>
+            <input type="password" id="deepseek-api-key" placeholder="sk-...">
+            <small class="help-text">
+              <span data-i18n="options.getApiKey">Get</span>: <a href="https://platform.deepseek.com/api_keys" target="_blank">DeepSeek Platform</a>
+            </small>
+          </div>
+          <div class="form-group">
+            <label for="deepseek-text-model" data-i18n="options.textModel">Text Model</label>
+            <select id="deepseek-text-model">
+              <option value="deepseek-chat" selected data-i18n-value="options.deepseekChat">deepseek-chat (Recommended)</option>
+              <option value="deepseek-reasoner" data-i18n-value="options.deepseekReasoner">deepseek-reasoner (R1 Reasoning)</option>
+            </select>
+          </div>
+          <div id="deepseek-text-status" class="api-status"></div>
+        </div>
+        
+        <!-- Qwen 文本配置 -->
+        <div id="text-qwen-config" class="provider-config-inline" style="display: none;">
+          <div class="form-group">
+            <label for="qwen-api-key">Qwen <span data-i18n="options.apiKey">API Key</span> <span class="required">*</span></label>
+            <input type="password" id="qwen-api-key" placeholder="sk-...">
+            <small class="help-text">
+              <span data-i18n="options.getApiKey">Get</span>: <a href="https://dashscope.console.aliyun.com/apiKey" target="_blank">Aliyun DashScope</a>
+            </small>
+          </div>
+          <div class="form-group">
+            <label for="qwen-text-model" data-i18n="options.textModel">Text Model</label>
+            <select id="qwen-text-model">
+              <option value="qwen-turbo" selected data-i18n-value="options.qwenTurbo">qwen-turbo (Fast)</option>
+              <option value="qwen-plus" data-i18n-value="options.qwenPlus">qwen-plus (Balanced)</option>
+              <option value="qwen-max" data-i18n-value="options.qwenMax">qwen-max (Best)</option>
+            </select>
+          </div>
+          <div id="qwen-text-status" class="api-status"></div>
+        </div>
+      </section>
+      
+      <!-- 图片检测配置 -->
+      <section class="settings-section">
+        <h2 data-i18n="options.imageDetection">🖼️ Image Detection Configuration</h2>
+        
+        <div class="form-group">
+          <label for="image-provider" data-i18n="options.imageProvider">Select Image Detection Provider</label>
+          <select id="image-provider">
+            <option value="gemini" data-i18n-value="options.providerGemini">Google Gemini (Recommended)</option>
+            <option value="qwen" data-i18n-value="options.providerQwen">Qwen</option>
+          </select>
+          <small class="help-text" data-i18n="options.imageProviderNote">⚠️ DeepSeek does not support image detection</small>
+        </div>
+        
+        <!-- Gemini 图片配置 -->
+        <div id="image-gemini-config" class="provider-config-inline">
+          <div id="gemini-image-api-section" style="display: none;">
+            <div class="form-group">
+              <label for="gemini-image-api-key">Gemini <span data-i18n="options.imageApiKeyDedicated">API Key (Dedicated for Images)</span><span class="required">*</span></label>
+              <input type="password" id="gemini-image-api-key" placeholder="AIza...">
+              <small class="help-text">
+                <span data-i18n="options.getApiKey">Get</span>: <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a>
+              </small>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="gemini-image-model" data-i18n="options.imageModel">Image Model</label>
+            <select id="gemini-image-model">
+              <option value="gemini-2.5-flash" selected data-i18n-value="options.geminiRecommended">gemini-2.5-flash (Recommended)</option>
+              <option value="gemini-1.5-pro" data-i18n-value="options.geminiImagePro">gemini-1.5-pro (More Accurate)</option>
+            </select>
+            <small class="help-text" id="gemini-image-api-hint" data-i18n="options.apiKeyShared">✅ Shared with text API Key</small>
+          </div>
+          <div id="gemini-image-status" class="api-status"></div>
+        </div>
+        
+        <!-- Qwen 图片配置 -->
+        <div id="image-qwen-config" class="provider-config-inline" style="display: none;">
+          <div id="qwen-image-api-section" style="display: none;">
+            <div class="form-group">
+              <label for="qwen-image-api-key">Qwen <span data-i18n="options.imageApiKeyDedicated">API Key (Dedicated for Images)</span><span class="required">*</span></label>
+              <input type="password" id="qwen-image-api-key" placeholder="sk-...">
+              <small class="help-text">
+                <span data-i18n="options.getApiKey">Get</span>: <a href="https://dashscope.console.aliyun.com/apiKey" target="_blank">Aliyun DashScope</a>
+              </small>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="qwen-image-model" data-i18n="options.imageModel">Image Model</label>
+            <select id="qwen-image-model">
+              <option value="qwen-vl-plus" selected data-i18n-value="options.qwenVlPlus">qwen-vl-plus (Recommended)</option>
+              <option value="qwen-vl-max" data-i18n-value="options.qwenVlMax">qwen-vl-max (More Accurate)</option>
+            </select>
+            <small class="help-text" id="qwen-image-api-hint" data-i18n="options.apiKeyShared">✅ Shared with text API Key</small>
+          </div>
+          <div id="qwen-image-status" class="api-status"></div>
+        </div>
+      </section>
+      
+      <!-- 调试选项 -->
+      <section class="settings-section">
+        <h2 data-i18n="options.debugOptions">🐛 Debug Options</h2>
+        <div class="checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="enable-debug-logs">
+            <span data-i18n="options.enableDebugLogs">Enable Debug Logs</span>
+            <small data-i18n="options.debugLogsDesc">Show API request and response details in console</small>
+          </label>
+        </div>
+        <div class="form-group" id="debug-details" style="display: none;">
+          <label class="checkbox-label" style="margin-left: 32px;">
+            <input type="checkbox" id="log-prompts" checked>
+            <span data-i18n="options.logPrompts">📤 Log Prompts</span>
+          </label>
+          <label class="checkbox-label" style="margin-left: 32px;">
+            <input type="checkbox" id="log-responses" checked>
+            <span data-i18n="options.logResponses">📥 Log API Responses</span>
+          </label>
+          <label class="checkbox-label" style="margin-left: 32px;">
+            <input type="checkbox" id="log-timing" checked>
+            <span data-i18n="options.logTiming">⏱️ Log Performance Timing</span>
+          </label>
+        </div>
+      </section>
+      
+      <!-- 检测类别 -->
+      <section class="settings-section">
+        <h2 data-i18n="options.detectionCategories">✅ Detection Categories</h2>
+        <div class="checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="detect-privacy" checked>
+            <span data-i18n="options.detectPrivacy">🔒 Detect Privacy Information</span>
+            <small data-i18n="options.detectPrivacyDesc">Phone, email, ID number, bank card number</small>
+          </label>
+          
+          <label class="checkbox-label">
+            <input type="checkbox" id="detect-sensitive" checked>
+            <span data-i18n="options.detectSensitive">⚠️ Detect Sensitive Content</span>
+            <small data-i18n="options.detectSensitiveDesc">Pornography, violence, political sensitivity</small>
+          </label>
+          
+          <label class="checkbox-label">
+            <input type="checkbox" id="detect-harmful" checked>
+            <span data-i18n="options.detectHarmful">☠️ Detect Harmful Information</span>
+            <small data-i18n="options.detectHarmfulDesc">Gambling, fraud, drugs, self-harm</small>
+          </label>
+          
+          <label class="checkbox-label">
+            <input type="checkbox" id="detect-images" checked>
+            <span data-i18n="options.detectImages">🖼️ Detect Image Content</span>
+            <small data-i18n="options.detectImagesDesc">Moderate image content</small>
+          </label>
+        </div>
+      </section>
+      
+      <!-- 白名单 -->
+      <section class="settings-section">
+        <h2 data-i18n="options.whitelist">🌐 Website Whitelist</h2>
+        <p class="section-description" data-i18n="options.whitelistDesc">The following websites will not be content moderated</p>
+        <div class="form-group">
+          <div class="input-with-button">
+            <input type="text" id="whitelist-input" data-i18n-placeholder="options.whitelistPlaceholder" placeholder="Enter domain, e.g.: example.com">
+            <button id="add-whitelist" class="btn-primary" data-i18n="options.addButton">Add</button>
+          </div>
+          <div id="whitelist-domains"></div>
+        </div>
+      </section>
+      
+      <!-- 性能设置 -->
+      <section class="settings-section">
+        <h2 data-i18n="options.performance">⚡ Performance Settings</h2>
+        <div class="form-group">
+          <label for="detection-delay" data-i18n="options.detectionDelay">Detection Delay</label>
+          <select id="detection-delay">
+            <option value="500" data-i18n-value="options.delayHalfSecond">0.5 seconds</option>
+            <option value="1000" selected data-i18n-value="options.delayOneSecond">1 second</option>
+            <option value="2000" data-i18n-value="options.delayTwoSeconds">2 seconds</option>
+          </select>
+          <small class="help-text" data-i18n="options.delayDesc">Delay time for detecting dynamic content after loading</small>
+        </div>
+        
+        <div class="checkbox-group">
+          <label class="checkbox-label">
+            <input type="checkbox" id="skip-small-images" checked>
+            <span data-i18n="options.skipSmallImages">Skip Small Images</span>
+            <small data-i18n="options.skipSmallImagesDesc">Do not detect images smaller than 100KB to improve performance</small>
+          </label>
+        </div>
+      </section>
+    </main>
+    
+    <footer class="footer">
+      <button id="save-button" class="btn-success" data-i18n="options.saveButton">💾 Save Settings</button>
+      <button id="reset-button" class="btn-secondary" data-i18n="options.resetButton">🔄 Reset to Default</button>
+      <div id="status-message" class="save-status"></div>
+    </footer>
+  </div>
+  
+  <script src="../utils/i18n.js"></script>
+  <script src="options.js"></script>
+</body>
+</html>

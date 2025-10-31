@@ -1,0 +1,128 @@
+{
+  "extensionName": "SafeGuard - Smart Content Moderation",
+  "extensionDescription": "AI-powered content moderation Chrome extension based on Google Gemini AI, automatically detects and blocks privacy information, sensitive content and harmful information on web pages.",
+  
+  "popup": {
+    "title": "SafeGuard",
+    "statusProtecting": "Protecting",
+    "statusPaused": "Paused",
+    "statsTitle": "Page Stats",
+    "statsTotal": "Total",
+    "statsPrivacy": "Privacy",
+    "statsSensitive": "Sensitive",
+    "statsHarmful": "Harmful",
+    "enableProtection": "Enable Protection",
+    "todayProtection": "Today's Protection",
+    "settingsButton": "Settings",
+    "viewLogsButton": "View Logs"
+  },
+  
+  "options": {
+    "title": "SafeGuard Settings",
+    "subtitle": "Configure your smart content moderation preferences",
+    
+    "textDetection": "Text Detection Configuration",
+    "textProvider": "Select Text Detection Provider",
+    "providerGemini": "Google Gemini (Recommended)",
+    "providerDeepSeek": "DeepSeek (Cost-effective)",
+    "providerQwen": "Qwen",
+    
+    "imageDetection": "Image Detection Configuration",
+    "imageProvider": "Select Image Detection Provider",
+    "imageProviderNote": "⚠️ DeepSeek does not support image detection",
+    
+    "apiKey": "API Key",
+    "apiKeyRequired": "*",
+    "apiKeyPlaceholder": "Enter API Key",
+    "getApiKey": "Get",
+    "imageApiKeyDedicated": "API Key (Dedicated for Images)",
+    "textModel": "Text Model",
+    "imageModel": "Image Model",
+    
+    "geminiRecommended": "gemini-2.5-flash (Recommended)",
+    "geminiPro": "gemini-1.5-pro (More Powerful)",
+    "geminiImagePro": "gemini-1.5-pro (More Accurate)",
+    
+    "deepseekChat": "deepseek-chat (Recommended)",
+    "deepseekReasoner": "deepseek-reasoner (R1 Reasoning)",
+    
+    "qwenTurbo": "qwen-turbo (Fast)",
+    "qwenPlus": "qwen-plus (Balanced)",
+    "qwenMax": "qwen-max (Best)",
+    "qwenVlPlus": "qwen-vl-plus (Recommended)",
+    "qwenVlMax": "qwen-vl-max (More Accurate)",
+    
+    "apiKeyShared": "✅ Shared with text API Key",
+    
+    "debugOptions": "Debug Options",
+    "enableDebugLogs": "Enable Debug Logs",
+    "debugLogsDesc": "Show API request and response details in console",
+    "logPrompts": "📤 Log Prompts",
+    "logResponses": "📥 Log API Responses",
+    "logTiming": "⏱️ Log Performance Timing",
+    
+    "detectionCategories": "Detection Categories",
+    "detectPrivacy": "🔒 Detect Privacy Information",
+    "detectPrivacyDesc": "Phone, email, ID number, bank card number",
+    "detectSensitive": "⚠️ Detect Sensitive Content",
+    "detectSensitiveDesc": "Pornography, violence, political sensitivity",
+    "detectHarmful": "☠️ Detect Harmful Information",
+    "detectHarmfulDesc": "Gambling, fraud, drugs, self-harm",
+    "detectImages": "🖼️ Detect Image Content",
+    "detectImagesDesc": "Moderate image content",
+    
+    "whitelist": "Website Whitelist",
+    "whitelistDesc": "The following websites will not be content moderated",
+    "whitelistPlaceholder": "Enter domain, e.g.: example.com",
+    "addButton": "Add",
+    
+    "performance": "Performance Settings",
+    "detectionDelay": "Detection Delay",
+    "delayHalfSecond": "0.5 seconds",
+    "delayOneSecond": "1 second",
+    "delayTwoSeconds": "2 seconds",
+    "delayDesc": "Delay time for detecting dynamic content after loading",
+    "skipSmallImages": "Skip Small Images",
+    "skipSmallImagesDesc": "Do not detect images smaller than 100KB to improve performance",
+    
+    "language": "Language Settings",
+    "selectLanguage": "Select Language",
+    "languageEnglish": "English",
+    "languageChinese": "简体中文",
+    
+    "saveButton": "💾 Save Settings",
+    "resetButton": "🔄 Reset to Default",
+    "saveSuccess": "✅ Settings saved successfully!",
+    "saveError": "❌ Failed to save settings",
+    
+    "apiStatusValid": "✅ API Key is valid",
+    "apiStatusInvalid": "❌ API Key format is invalid",
+    "apiStatusEmpty": "⚠️ API Key is required"
+  },
+  
+  "content": {
+    "privacyBlocked": "Privacy information blocked",
+    "sensitiveBlocked": "Sensitive content blocked",
+    "harmfulBlocked": "Harmful information blocked",
+    "blockedItems": "Blocked {count} items",
+    "clickToReveal": "Click to reveal",
+    "imageBlocked": "Image blocked",
+    "textBlocked": "Text blocked"
+  ,
+    "popupBlockedTip": "Harmful content detected in popup",
+    "popupBtnClose": "Close Popup",
+    "popupBtnView": "View Blocked Content"
+  },
+  
+  "logs": {
+    "title": "SafeGuard Logs",
+    "viewerTitle": "Log Viewer",
+    "clearLogs": "Clear Logs",
+    "exportLogs": "Export Logs",
+    "noLogs": "No logs available",
+    "timestamp": "Timestamp",
+    "type": "Type",
+    "content": "Content",
+    "details": "Details"
+  }
+}

@@ -1,0 +1,427 @@
+/* 弹窗整体遮罩样式 */
+.safeguard-popup-mask {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.72);
+  z-index: 99999;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+  font-size: 1.2em;
+  backdrop-filter: blur(2px);
+  border-radius: inherit;
+  box-sizing: border-box;
+}
+.safeguard-popup-mask button {
+  margin: 0 8px;
+  padding: 8px 18px;
+  font-size: 1em;
+  border-radius: 6px;
+  border: none;
+  background: #888;
+  color: #fff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.safeguard-popup-btn-close {
+  background: #e74c3c;
+}
+.safeguard-popup-btn-close:hover {
+  background: #c0392b;
+}
+.safeguard-popup-btn-view {
+  background: #3498db;
+}
+.safeguard-popup-btn-view:hover {
+  background: #217dbb;
+}
+/* SafeGuard Content Styles - 页面注入样式 */
+
+/* 浮动统计显示 */
+.safeguard-floating-stats {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: rgba(102, 126, 234, 0.95);
+  color: white;
+  padding: 12px 16px;
+  border-radius: 24px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  z-index: 999999;
+  transition: all 0.3s ease;
+}
+
+.safeguard-floating-stats:hover {
+  transform: scale(1.05);
+}
+
+.safeguard-stats-icon {
+  font-size: 20px;
+}
+
+.safeguard-stats-text {
+  font-weight: 600;
+}
+
+#safeguard-block-count {
+  font-weight: 700;
+  font-size: 16px;
+}
+
+/* 文本屏蔽样式 */
+.safeguard-blocked-text {
+  position: relative;
+  display: inline-block;
+  background: #000 !important;
+  color: transparent !important;
+  border-radius: 4px;
+  padding: 2px 4px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.safeguard-blocked-text::after {
+  content: attr(data-after);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* 使用 data-after 属性来允许 JS 动态设置本地化文本 */
+
+
+/* 图片屏蔽样式 */
+.safeguard-blocked-image {
+  position: relative !important;
+  filter: blur(20px) !important;
+  cursor: pointer !important;
+}
+
+.safeguard-image-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  color: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  z-index: 10;
+}
+
+.safeguard-image-mask-icon {
+  font-size: 48px;
+  margin-bottom: 8px;
+}
+
+.safeguard-image-mask-text {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.safeguard-image-mask-hint {
+  font-size: 12px;
+  opacity: 0.8;
+  margin-top: 4px;
+}
+
+/* 已显示状态 */
+.safeguard-revealed.safeguard-blocked-text {
+  background: transparent !important;
+  color: inherit !important;
+}
+
+.safeguard-revealed.safeguard-blocked-text::after {
+  display: none;
+}
+
+
+/* reveal 时图片清晰，遮罩消失 */
+.safeguard-revealed .safeguard-blocked-image {
+  filter: none !important;
+}
+.safeguard-revealed .safeguard-image-mask {
+  display: none !important;
+}
+
+/* 优化查看按钮和遮罩内容 */
+.safeguard-mask-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+.safeguard-mask-icon {
+  font-size: 44px;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 2px 8px #ffb6b6);
+}
+.safeguard-mask-label {
+  font-size: 16px;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 2px 8px #000;
+  margin-bottom: 8px;
+}
+.safeguard-reveal-btn {
+  padding: 12px 32px;
+  background: linear-gradient(90deg, #ff5f6d 0%, #ffc371 100%);
+  color: #fff;
+  border: none;
+  border-radius: 24px;
+  font-size: 18px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(.4,2,.6,1);
+  box-shadow: 0 4px 16px rgba(255, 95, 109, 0.25);
+  letter-spacing: 1px;
+  margin-top: 8px;
+}
+.safeguard-reveal-btn:hover {
+  background: linear-gradient(90deg, #ffc371 0%, #ff5f6d 100%);
+  transform: scale(1.08);
+  box-shadow: 0 8px 24px rgba(255, 95, 109, 0.35);
+}
+.safeguard-mask-tip {
+  font-size: 13px;
+  color: #ffe6e6;
+  margin-top: 6px;
+  text-shadow: 0 1px 4px #000;
+}
+
+/* 通知样式 */
+.safeguard-notification {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  padding: 16px 20px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  z-index: 1000000;
+  transition: opacity 0.3s ease;
+  max-width: 300px;
+}
+
+.safeguard-notification-info {
+  border-left: 4px solid #3498db;
+}
+
+.safeguard-notification-warning {
+  border-left: 4px solid #f39c12;
+}
+
+.safeguard-notification-error {
+  border-left: 4px solid #e74c3c;
+}
+
+.safeguard-notification-success {
+  border-left: 4px solid #27ae60;
+}
+
+/* 遮罩卡片 */
+.safeguard-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.85);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  border-radius: 4px;
+  z-index: 10;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  pointer-events: auto;
+}
+
+.safeguard-text-mask {
+  min-height: 60px;
+  backdrop-filter: blur(2px);
+}
+
+.safeguard-image-mask {
+  min-height: 150px;
+}
+
+.safeguard-mask-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+.safeguard-mask-icon {
+  font-size: 36px;
+  margin-bottom: 4px;
+}
+
+.safeguard-mask-label {
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.safeguard-mask-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.safeguard-mask-description {
+  font-size: 12px;
+  opacity: 0.8;
+  text-align: center;
+}
+
+/* 查看按钮 - 更新样式 */
+.safeguard-reveal-btn {
+  padding: 8px 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border: none;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.safeguard-reveal-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+}
+
+/* 动画 */
+@keyframes safeguard-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+  .safeguard-inline-mask.revealed:hover {
+    transform: none;
+    background: rgba(200, 200, 200, 0.35);
+  }
+
+  @import url('./safeguard-image-wrapper.css');
+
+/* 屏蔽标记 - 与原文等高等宽的内联替换 */
+.safeguard-inline-mask {
+  display: inline;
+  background: #FFB3B3;
+  color: transparent;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+  border-radius: 2px;
+  position: relative;
+}
+
+/* 默认状态：显示屏蔽提示文本 */
+.safeguard-inline-mask::before {
+  /* 使用 data-before 属性以支持运行时本地化 */
+  content: attr(data-before);
+  color: #FF6B6B;
+  font-weight: 600;
+  font-size: inherit;
+}
+
+/* 颜色可以根据 data-category 保持样式差异（仍可用 CSS 规则） */
+.safeguard-inline-mask[data-category="privacy"]::before {
+  color: #FF6B6B;
+}
+
+.safeguard-inline-mask[data-category="sensitive"]::before {
+  color: #F06595;
+}
+
+.safeguard-inline-mask[data-category="harmful"]::before {
+  color: #C92A2A;
+}
+
+/* 鼠标悬停：背景变深 */
+.safeguard-inline-mask:hover {
+  background: #FFC9C9;
+}
+
+.safeguard-inline-mask:active {
+  background: #FFD9D9;
+}
+
+/* 点击后显示原始内容 - 灰色背景 */
+.safeguard-inline-mask.revealed {
+  background: #D3D3D3;
+  color: inherit;
+  cursor: text;
+}
+
+/* 删除替换符号 */
+.safeguard-inline-mask.revealed::before {
+  content: none;
+}
+
+/* 显示原文 */
+.safeguard-inline-mask.revealed::after {
+  content: attr(data-original);
+}
+
+/* 悬停时背景稍微变深 */
+.safeguard-inline-mask.revealed:hover {
+  background: #C0C0C0;
+}
+
+/* 链接内屏蔽内容的跳转按钮 */
+.safeguard-original-link {
+  display: inline-block;
+  margin-left: 4px;
+  padding: 2px 6px;
+  background: #4A90E2;
+  color: white !important;
+  text-decoration: none !important;
+  border-radius: 3px;
+  font-size: 0.9em;
+  font-weight: 500;
+  transition: background 0.2s ease;
+  cursor: pointer;
+}
+
+.safeguard-original-link:hover {
+  background: #357ABD;
+  text-decoration: none !important;
+}
+
+.safeguard-original-link:active {
+  background: #2A5F9C;
+}
+

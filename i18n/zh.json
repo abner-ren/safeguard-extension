@@ -1,0 +1,128 @@
+{
+  "extensionName": "SafeGuard - 智能内容审核",
+  "extensionDescription": "基于 Google Gemini AI 的智能内容审核 Chrome 扩展，自动检测并屏蔽网页中的隐私信息、敏感内容和有害信息。",
+  
+  "popup": {
+    "title": "SafeGuard",
+    "statusProtecting": "正在保护",
+    "statusPaused": "已暂停",
+    "statsTitle": "本页统计",
+    "statsTotal": "总计",
+    "statsPrivacy": "隐私",
+    "statsSensitive": "敏感",
+    "statsHarmful": "有害",
+    "enableProtection": "启用保护",
+    "todayProtection": "今日保护",
+    "settingsButton": "设置",
+    "viewLogsButton": "查看日志"
+  },
+  
+  "options": {
+    "title": "SafeGuard 设置",
+    "subtitle": "配置您的智能内容审核偏好",
+    
+    "textDetection": "📝 文本检测配置",
+    "textProvider": "选择文本检测服务商",
+    "providerGemini": "Google Gemini (推荐)",
+    "providerDeepSeek": "DeepSeek (性价比高)",
+    "providerQwen": "通义千问",
+    
+    "imageDetection": "🖼️ 图片检测配置",
+    "imageProvider": "选择图片检测服务商",
+    "imageProviderNote": "⚠️ DeepSeek 不支持图片检测",
+    
+    "apiKey": "API Key",
+    "apiKeyRequired": "*",
+    "apiKeyPlaceholder": "请输入 API Key",
+    "getApiKey": "获取",
+    "imageApiKeyDedicated": "API Key（图片专用）",
+    "textModel": "文本模型",
+    "imageModel": "图片模型",
+    
+    "geminiRecommended": "gemini-2.5-flash (推荐)",
+    "geminiPro": "gemini-1.5-pro (更强大)",
+    "geminiImagePro": "gemini-1.5-pro (更准确)",
+    
+    "deepseekChat": "deepseek-chat (推荐)",
+    "deepseekReasoner": "deepseek-reasoner (R1 推理)",
+    
+    "qwenTurbo": "qwen-turbo (快速)",
+    "qwenPlus": "qwen-plus (平衡)",
+    "qwenMax": "qwen-max (最强)",
+    "qwenVlPlus": "qwen-vl-plus (推荐)",
+    "qwenVlMax": "qwen-vl-max (更准确)",
+    
+    "apiKeyShared": "✅ 与文本共用 API Key",
+    
+    "debugOptions": "🐛 调试选项",
+    "enableDebugLogs": "启用调试日志",
+    "debugLogsDesc": "在控制台显示 API 请求和响应详情",
+    "logPrompts": "📤 记录提示词（Prompts）",
+    "logResponses": "📥 记录API响应",
+    "logTiming": "⏱️ 记录性能时间",
+    
+    "detectionCategories": "✅ 检测类别",
+    "detectPrivacy": "🔒 检测隐私信息",
+    "detectPrivacyDesc": "电话、邮箱、身份证号、银行卡号",
+    "detectSensitive": "⚠️ 检测敏感内容",
+    "detectSensitiveDesc": "色情、暴力、政治敏感",
+    "detectHarmful": "☠️ 检测有害信息",
+    "detectHarmfulDesc": "赌博、诈骗、毒品、自残",
+    "detectImages": "🖼️ 检测图片内容",
+    "detectImagesDesc": "对图片进行内容审核",
+    
+    "whitelist": "🌐 网站白名单",
+    "whitelistDesc": "以下网站将不会进行内容检测",
+    "whitelistPlaceholder": "输入域名，例如: example.com",
+    "addButton": "添加",
+    
+    "performance": "⚡ 性能设置",
+    "detectionDelay": "检测延迟",
+    "delayHalfSecond": "0.5 秒",
+    "delayOneSecond": "1 秒",
+    "delayTwoSeconds": "2 秒",
+    "delayDesc": "动态内容加载后延迟检测的时间",
+    "skipSmallImages": "跳过小图片",
+    "skipSmallImagesDesc": "不检测小于 100KB 的图片，提升性能",
+    
+    "language": "🌍 语言设置",
+    "selectLanguage": "选择语言",
+    "languageEnglish": "English",
+    "languageChinese": "简体中文",
+    
+    "saveButton": "💾 保存设置",
+    "resetButton": "🔄 重置为默认",
+    "saveSuccess": "✅ 设置保存成功！",
+    "saveError": "❌ 保存设置失败",
+    
+    "apiStatusValid": "✅ API Key 有效",
+    "apiStatusInvalid": "❌ API Key 格式无效",
+    "apiStatusEmpty": "⚠️ 请输入 API Key"
+  },
+  
+  "content": {
+    "privacyBlocked": "已屏蔽隐私信息",
+    "sensitiveBlocked": "已屏蔽敏感内容",
+    "harmfulBlocked": "已屏蔽有害信息",
+    "blockedItems": "已屏蔽 {count} 项",
+    "clickToReveal": "点击显示",
+    "imageBlocked": "图片已屏蔽",
+    "textBlocked": "文本已屏蔽"
+  ,
+    "popupBlockedTip": "弹窗检测到有害内容",
+    "popupBtnClose": "关闭弹窗",
+    "popupBtnView": "查看屏蔽内容"
+  },
+  
+  "logs": {
+    "title": "SafeGuard 日志",
+    "viewerTitle": "日志查看器",
+    "clearLogs": "清空日志",
+    "exportLogs": "导出日志",
+    "noLogs": "暂无日志",
+    "timestamp": "时间戳",
+    "type": "类型",
+    "content": "内容",
+    "details": "详情"
+  }
+}

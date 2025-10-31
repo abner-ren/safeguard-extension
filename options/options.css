@@ -1,0 +1,450 @@
+/* SafeGuard Options Page Styles */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  overflow: hidden;
+}
+
+/* Header */
+.header {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 32px;
+  text-align: center;
+}
+
+.header h1 {
+  font-size: 32px;
+  margin-bottom: 8px;
+}
+
+.subtitle {
+  font-size: 16px;
+  opacity: 0.9;
+}
+
+/* Main Content */
+.main-content {
+  padding: 32px;
+}
+
+.settings-section {
+  margin-bottom: 32px;
+  padding-bottom: 32px;
+  border-bottom: 1px solid #eee;
+}
+
+.settings-section:last-child {
+  border-bottom: none;
+}
+
+.settings-section h2 {
+  font-size: 20px;
+  color: #333;
+  margin-bottom: 16px;
+}
+
+.section-description {
+  color: #666;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+/* Form Groups */
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: #333;
+}
+
+.required {
+  color: #e74c3c;
+}
+
+.form-group input[type="text"],
+.form-group input[type="password"],
+.form-group select {
+  width: 100%;
+  padding: 12px;
+  border: 2px solid #ddd;
+  border-radius: 6px;
+  font-size: 14px;
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.help-text {
+  display: block;
+  margin-top: 6px;
+  font-size: 12px;
+  color: #999;
+}
+
+.help-text a {
+  color: #667eea;
+  text-decoration: none;
+}
+
+.help-text a:hover {
+  text-decoration: underline;
+}
+
+/* API Status */
+.api-status {
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.status-success {
+  color: #27ae60;
+}
+
+.status-error {
+  color: #e74c3c;
+}
+
+/* Checkbox Group */
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.checkbox-label:hover {
+  background: #e9ecef;
+}
+
+.checkbox-label input[type="checkbox"] {
+  margin-top: 2px;
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.checkbox-label span {
+  flex: 1;
+}
+
+.checkbox-label small {
+  display: block;
+  color: #999;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+/* Input with Button */
+.input-with-button {
+  display: flex;
+  gap: 8px;
+}
+
+.input-with-button input {
+  flex: 1;
+}
+
+/* Whitelist */
+.whitelist-list {
+  list-style: none;
+  margin-top: 12px;
+}
+
+.whitelist-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.whitelist-list li span {
+  font-family: monospace;
+  color: #667eea;
+}
+
+.btn-remove {
+  padding: 6px 12px;
+  background: #e74c3c;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.2s;
+}
+
+.btn-remove:hover {
+  background: #c0392b;
+}
+
+/* Footer */
+.footer {
+  padding: 24px 32px;
+  background: #f8f9fa;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.footer button {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background: #667eea;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #5568d3;
+}
+
+.btn-success {
+  background: #27ae60;
+  color: white;
+}
+
+.btn-success:hover {
+  background: #229954;
+}
+
+.btn-secondary {
+  background: white;
+  color: #666;
+  border: 2px solid #ddd;
+}
+
+.btn-secondary:hover {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+.save-status {
+  flex: 1;
+  text-align: right;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.save-status.status-success {
+  color: #27ae60;
+}
+
+.save-status.status-error {
+  color: #e74c3c;
+}
+
+.save-status.status-warning {
+  color: #f39c12;
+}
+
+/* API Config Sections */
+.api-config-section {
+  padding: 16px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  margin-top: 16px;
+  border: 2px solid #e0e0e0;
+  transition: all 0.3s;
+}
+
+.api-config-section .form-group {
+  margin-bottom: 16px;
+}
+
+.api-config-section .form-group:last-child {
+  margin-bottom: 0;
+}
+
+/* Provider Status Indicators */
+#gemini-status::before,
+#deepseek-status::before {
+  content: '●';
+  margin-right: 6px;
+  font-size: 16px;
+}
+
+#gemini-status.status-success::before {
+  color: #27ae60;
+}
+
+#gemini-status.status-error::before {
+  color: #e74c3c;
+}
+
+#deepseek-status.status-success::before {
+  color: #27ae60;
+}
+
+#deepseek-status.status-error::before {
+  color: #e74c3c;
+}
+
+/* Provider Header Styles */
+.provider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.provider-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.provider-badge {
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 4px 12px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Alert Warning */
+.alert-warning {
+  background: #fff3cd;
+  border: 1px solid #ffc107;
+  border-radius: 6px;
+  padding: 12px;
+  margin-bottom: 16px;
+  color: #856404;
+  font-size: 14px;
+}
+
+/* Model Config Section */
+.model-config {
+  margin-top: 12px;
+}
+
+/* Whitelist Domains */
+#whitelist-domains {
+  margin-top: 16px;
+}
+
+.whitelist-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.whitelist-item span {
+  font-size: 14px;
+  color: #333;
+}
+
+.whitelist-item .remove-btn {
+  background: #e74c3c;
+  color: white;
+  border: none;
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.whitelist-item .remove-btn:hover {
+  background: #c0392b;
+}
+
+/* Debug Details */
+#debug-details {
+  margin-left: 32px;
+  margin-top: 12px;
+}
+
+#debug-details .checkbox-label {
+  margin-bottom: 8px;
+}
+
+/* API Status */
+.api-status {
+  margin-top: 12px;
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.api-status.valid {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.api-status.invalid {
+  background: #f8d7da;
+  color: #721c24;
+  border: 1px solid #f5c6cb;
+}
+
+/* Provider Config Inline - 紧跟在选择器后面的配置 */
+.provider-config-inline {
+  margin-top: 20px;
+  padding: 20px;
+  background: #f8f9fa;
+  border-left: 4px solid #667eea;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+}
+
+.provider-config-inline .form-group {
+  margin-bottom: 16px;
+}
+
+.provider-config-inline .form-group:last-child {
+  margin-bottom: 0;
+}

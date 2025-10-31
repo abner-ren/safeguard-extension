@@ -1,0 +1,41 @@
+.github
+.git
+.gitignore
+
+# Logs and temporary files
+logs/*.log
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Backup files
+*.backup
+*.bak
+content.js.backup_before_shadowdom
+
+# API Keys (should never be committed)
+key
+keys/
+*.key
+*apikey*
+
+# Node modules (if any)
+node_modules/
+
+# Build files (if any)
+dist/
+build/
+
+# Test files (optional - remove if you want to include tests)
+# tests/
+# image_test/

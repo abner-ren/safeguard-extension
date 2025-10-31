@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafeGuard</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="popup-container">
+    <header class="popup-header">
+      <div class="header-title">
+        <span class="shield-icon">🛡️</span>
+        <h1 data-i18n="popup.title">SafeGuard</h1>
+      </div>
+      <div class="status-indicator">
+        <span id="status-text" data-i18n="popup.statusProtecting">正在保护</span>
+        <span id="status-dot" class="status-dot active"></span>
+      </div>
+    </header>
+    
+    <div class="popup-content">
+      <section class="stats-section">
+        <h2 data-i18n="popup.statsTitle">本页统计</h2>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <div class="stat-value" id="total-blocked">0</div>
+            <div class="stat-label" data-i18n="popup.statsTotal">总计</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="privacy-blocked">0</div>
+            <div class="stat-label" data-i18n="popup.statsPrivacy">隐私</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="sensitive-blocked">0</div>
+            <div class="stat-label" data-i18n="popup.statsSensitive">敏感</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value" id="harmful-blocked">0</div>
+            <div class="stat-label" data-i18n="popup.statsHarmful">有害</div>
+          </div>
+        </div>
+      </section>
+      
+      <section class="controls-section">
+        <div class="toggle-control">
+          <span data-i18n="popup.enableProtection">启用保护</span>
+          <label class="switch">
+            <input type="checkbox" id="enable-toggle" checked>
+            <span class="slider"></span>
+          </label>
+        </div>
+      </section>
+      
+      <section class="today-stats">
+        <h3 data-i18n="popup.todayProtection">今日保护</h3>
+        <div class="today-count" id="today-total">0</div>
+      </section>
+    </div>
+    
+    <footer class="popup-footer">
+      <button id="settings-btn" class="btn-secondary" data-i18n="popup.settingsButton">⚙️ 设置</button>
+      <button id="view-logs-btn" class="btn-secondary" data-i18n="popup.viewLogsButton">📋 查看日志</button>
+    </footer>
+  </div>
+  
+  <script src="../utils/i18n.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

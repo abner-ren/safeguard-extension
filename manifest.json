@@ -1,0 +1,70 @@
+{
+  "manifest_version": 3,
+  "name": "SafeGuard - 智能内容审核",
+  "version": "1.0.0",
+  "description": "基于 Google Gemini AI 的智能内容审核 Chrome 扩展，自动检测并屏蔽网页中的隐私信息、敏感内容和有害信息。",
+  "permissions": [
+    "storage",
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>",
+    "https://generativelanguage.googleapis.com/*",
+    "https://api.deepseek.com/*",
+    "https://dashscope.aliyuncs.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "utils/helpers.js",
+        "utils/i18n.js",
+        "utils/gemini-api.js",
+        "utils/deepseek-api.js",
+        "utils/qwen-api.js",
+        "utils/detector.js",
+        "content.js"
+      ],
+      "css": ["styles/content.css"],
+      "run_at": "document_end"
+    }
+  ],
+  "action": {
+    "default_popup": "popup/popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "options_page": "options/options.html",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["i18n/*.json"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "commands": {
+    "toggle-reveal": {
+      "suggested_key": {
+        "default": "Alt+Shift+S"
+      },
+      "description": "临时显示所有被屏蔽内容 (5秒)"
+    },
+    "toggle-pause": {
+      "suggested_key": {
+        "default": "Alt+Shift+P"
+      },
+      "description": "暂停/恢复插件"
+    }
+  }
+}

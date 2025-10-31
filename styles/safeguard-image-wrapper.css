@@ -1,0 +1,9 @@
+/* 图片屏蔽定位容器，确保遮罩只覆盖图片本身 */
+.safeguard-image-wrapper {
+  position: relative !important;
+  display: inline-block !important;
+  vertical-align: middle;
+  width: fit-content;
+  height: fit-content;
+  /* 允许自适应图片尺寸 */
+}

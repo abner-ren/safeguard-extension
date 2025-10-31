@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SafeGuard - 日志查看器</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .btn-primary {
+      background: white;
+      color: #667eea;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.3);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: 1px solid white;
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .stats {
+      padding: 20px 30px;
+      background: #f8f9fa;
+      border-bottom: 1px solid #e9ecef;
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      border-left: 4px solid #667eea;
+    }
+
+    .stat-label {
+      font-size: 12px;
+      color: #6c757d;
+      margin-bottom: 5px;
+    }
+
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      color: #333;
+    }
+
+    .filters {
+      padding: 20px 30px;
+      background: white;
+      border-bottom: 1px solid #e9ecef;
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .filter-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .filter-group label {
+      font-size: 14px;
+      color: #495057;
+      font-weight: 500;
+    }
+
+    .filter-group select,
+    .filter-group input {
+      padding: 8px 12px;
+      border: 1px solid #ced4da;
+      border-radius: 6px;
+      font-size: 14px;
+    }
+
+    .logs-container {
+      padding: 30px;
+      max-height: 600px;
+      overflow-y: auto;
+    }
+
+    .log-entry {
+      background: #f8f9fa;
+      border-left: 4px solid #28a745;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+    }
+
+    .log-entry:hover {
+      transform: translateX(5px);
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .log-entry.error {
+      border-left-color: #dc3545;
+    }
+
+    .log-entry.warning {
+      border-left-color: #ffc107;
+    }
+
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+    }
+
+    .log-type {
+      display: inline-block;
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: 600;
+      background: #667eea;
+      color: white;
+    }
+
+    .log-time {
+      font-size: 12px;
+      color: #6c757d;
+    }
+
+    .log-details {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .log-detail {
+      font-size: 13px;
+    }
+
+    .log-detail-label {
+      font-weight: 600;
+      color: #495057;
+    }
+
+    .log-detail-value {
+      color: #6c757d;
+      word-break: break-all;
+    }
+
+    .badge {
+      display: inline-block;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+
+    .badge-success {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .badge-danger {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .badge-warning {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .badge-info {
+      background: #d1ecf1;
+      color: #0c5460;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: #6c757d;
+    }
+
+    .empty-state-icon {
+      font-size: 64px;
+      margin-bottom: 20px;
+    }
+
+    .empty-state-text {
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>📋 日志查看器</h1>
+      <div class="header-actions">
+        <button class="btn btn-secondary" id="refresh-btn">🔄 刷新</button>
+        <button class="btn btn-secondary" id="clear-btn">🗑️ 清空日志</button>
+        <button class="btn btn-primary" id="download-btn">💾 下载日志</button>
+      </div>
+    </div>
+
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-label">总日志数</div>
+        <div class="stat-value" id="total-logs">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">图片检测</div>
+        <div class="stat-value" id="image-logs">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">文本检测</div>
+        <div class="stat-value" id="text-logs">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">错误日志</div>
+        <div class="stat-value" id="error-logs">0</div>
+      </div>
+    </div>
+
+    <div class="filters">
+      <div class="filter-group">
+        <label>类型:</label>
+        <select id="type-filter">
+          <option value="all">全部</option>
+          <option value="image_detection">图片检测</option>
+          <option value="text_detection">文本检测</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>结果:</label>
+        <select id="result-filter">
+          <option value="all">全部</option>
+          <option value="safe">安全</option>
+          <option value="privacy">隐私</option>
+          <option value="sensitive">敏感</option>
+          <option value="harmful">有害</option>
+          <option value="error">错误</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>提供商:</label>
+        <select id="provider-filter">
+          <option value="all">全部</option>
+          <option value="gemini">Gemini</option>
+          <option value="qwen">通义千问</option>
+          <option value="deepseek">DeepSeek</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="logs-container" id="logs-container">
+      <div class="empty-state">
+        <div class="empty-state-icon">📭</div>
+        <div class="empty-state-text">暂无日志记录</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="viewer.js"></script>
+</body>
+</html>

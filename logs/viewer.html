@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SafeGuard - 日志查看器</title>
+  <title data-i18n="viewer.title">SafeGuard - 日志查看器</title>
   <style>
     * {
       margin: 0;
@@ -249,77 +249,146 @@
     .empty-state-text {
       font-size: 18px;
     }
+
+    .image-preview {
+      margin-top: 10px;
+      max-width: 100%;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+
+    .image-preview:hover {
+      transform: scale(1.02);
+    }
+
+    .image-thumbnail {
+      max-width: 300px;
+      max-height: 200px;
+      object-fit: contain;
+    }
+
+    .image-modal {
+      display: none;
+      position: fixed;
+      z-index: 10000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      align-items: center;
+      justify-content: center;
+    }
+
+    .image-modal.active {
+      display: flex;
+    }
+
+    .image-modal img {
+      max-width: 90%;
+      max-height: 90%;
+      object-fit: contain;
+    }
+
+    .image-modal-close {
+      position: absolute;
+      top: 20px;
+      right: 40px;
+      color: white;
+      font-size: 40px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+
+    .image-modal-close:hover {
+      color: #ccc;
+    }
   </style>
 </head>
 <body>
   <div class="container">
     <div class="header">
-      <h1>📋 日志查看器</h1>
+      <h1 data-i18n="viewer.title">📋 日志查看器</h1>
       <div class="header-actions">
-        <button class="btn btn-secondary" id="refresh-btn">🔄 刷新</button>
-        <button class="btn btn-secondary" id="clear-btn">🗑️ 清空日志</button>
-        <button class="btn btn-primary" id="download-btn">💾 下载日志</button>
+        <button class="btn btn-secondary" id="refresh-btn" data-i18n="viewer.refresh">🔄 刷新</button>
+        <button class="btn btn-secondary" id="clear-btn" data-i18n="viewer.clear">🗑️ 清空日志</button>
+        <button class="btn btn-primary" id="download-btn" data-i18n="viewer.download">💾 下载日志</button>
       </div>
     </div>
 
     <div class="stats">
       <div class="stat-card">
-        <div class="stat-label">总日志数</div>
+        <div class="stat-label" data-i18n="viewer.totalLogs">总日志数</div>
         <div class="stat-value" id="total-logs">0</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">图片检测</div>
+        <div class="stat-label" data-i18n="viewer.imageLogs">图片检测</div>
         <div class="stat-value" id="image-logs">0</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">文本检测</div>
+        <div class="stat-label" data-i18n="viewer.textLogs">文本检测</div>
         <div class="stat-value" id="text-logs">0</div>
       </div>
       <div class="stat-card">
-        <div class="stat-label">错误日志</div>
+        <div class="stat-label" data-i18n="viewer.realtimeLogs">实时检测</div>
+        <div class="stat-value" id="realtime-logs">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label" data-i18n="viewer.errorLogs">错误日志</div>
         <div class="stat-value" id="error-logs">0</div>
       </div>
     </div>
 
     <div class="filters">
       <div class="filter-group">
-        <label>类型:</label>
+        <label data-i18n="viewer.filterType">类型:</label>
         <select id="type-filter">
-          <option value="all">全部</option>
-          <option value="image_detection">图片检测</option>
-          <option value="text_detection">文本检测</option>
+          <option value="all" data-i18n="viewer.filterAll">全部</option>
+          <option value="image_detection" data-i18n="viewer.typeImageDetection">图片检测</option>
+          <option value="text_detection" data-i18n="viewer.typeTextDetection">文本检测</option>
+          <option value="realtime_detection" data-i18n="viewer.typeRealtimeDetection">实时检测</option>
         </select>
       </div>
       <div class="filter-group">
-        <label>结果:</label>
+        <label data-i18n="viewer.filterResult">结果:</label>
         <select id="result-filter">
-          <option value="all">全部</option>
-          <option value="safe">安全</option>
-          <option value="privacy">隐私</option>
-          <option value="sensitive">敏感</option>
-          <option value="harmful">有害</option>
-          <option value="error">错误</option>
+          <option value="all" data-i18n="viewer.filterAll">全部</option>
+          <option value="safe" data-i18n="viewer.resultSafe">安全</option>
+          <option value="privacy" data-i18n="viewer.resultPrivacy">隐私</option>
+          <option value="sensitive" data-i18n="viewer.resultSensitive">敏感</option>
+          <option value="harmful" data-i18n="viewer.resultHarmful">有害</option>
+          <option value="error" data-i18n="viewer.resultError">错误</option>
         </select>
       </div>
       <div class="filter-group">
-        <label>提供商:</label>
+        <label data-i18n="viewer.filterProvider">提供商:</label>
         <select id="provider-filter">
-          <option value="all">全部</option>
-          <option value="gemini">Gemini</option>
-          <option value="qwen">通义千问</option>
-          <option value="deepseek">DeepSeek</option>
+          <option value="all" data-i18n="viewer.filterAll">全部</option>
+          <option value="gemini" data-i18n="viewer.providerGemini">Gemini</option>
+          <option value="qwen" data-i18n="viewer.providerQwen">通义千问</option>
+          <option value="deepseek" data-i18n="viewer.providerDeepseek">DeepSeek</option>
         </select>
       </div>
     </div>
 
     <div class="logs-container" id="logs-container">
       <div class="empty-state">
-        <div class="empty-state-icon">📭</div>
-        <div class="empty-state-text">暂无日志记录</div>
+        <div class="empty-state-icon" data-i18n="viewer.emptyStateIcon">📭</div>
+        <div class="empty-state-text" data-i18n="viewer.emptyStateText">暂无日志记录</div>
       </div>
     </div>
   </div>
 
+  <!-- 图片预览模态框 -->
+  <div class="image-modal" id="image-modal">
+    <span class="image-modal-close" id="modal-close">&times;</span>
+    <img id="modal-image" src="" alt="Image Preview">
+  </div>
+
+  <script src="../utils/i18n.js"></script>
   <script src="viewer.js"></script>
 </body>
 </html>

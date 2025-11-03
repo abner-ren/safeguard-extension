@@ -18,7 +18,7 @@ chrome.runtime.onInstalled.addListener(async () => {
     whitelist: [],
     detectionDelay: 1000, // 1秒
     skipSmallImages: true,
-    smallImageThreshold: 100 * 1024, // 100KB
+    smallImageThreshold: 50 * 1024, // 50KB - 优化后的阈值,平衡性能和检测准确性
     statistics: {
       today: {
         date: new Date().toDateString(),
@@ -81,6 +81,26 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     case 'downloadLogs':
       // 下载日志文件
       handleDownloadLogs(sendResponse);
+      return true;
+    
+    // ===== WebSocket 实时检测相关 =====
+    case 'startRealtimeDetection':
+      handleStartRealtimeDetection(request.settings, sendResponse);
+      return true;
+    
+    case 'detectRealtimeText':
+      handleDetectRealtimeText(request, sendResponse);
+      return true;
+    
+    case 'stopRealtimeDetection':
+      handleStopRealtimeDetection(sendResponse);
+      return true;
+    
+    case 'getRealtimeStatus':
+      sendResponse({ 
+        success: true, 
+        status: wsConnectionStatus 
+      });
       return true;
       
     default:
@@ -261,8 +281,9 @@ async function handleDownloadLogs(sendResponse) {
     
     // 生成日志内容
     const logContent = JSON.stringify(logs, null, 2);
-    const blob = new Blob([logContent], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
+    
+    // 使用 Data URL 而不是 Blob URL (Service Worker 不支持 URL.createObjectURL)
+    const dataUrl = 'data:application/json;charset=utf-8,' + encodeURIComponent(logContent);
     
     // 生成文件名（包含时间戳）
     const now = new Date();
@@ -270,7 +291,7 @@ async function handleDownloadLogs(sendResponse) {
     
     // 下载文件
     await chrome.downloads.download({
-      url: url,
+      url: dataUrl,
       filename: filename,
       saveAs: true
     });
@@ -291,4 +312,291 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   }
 });
 
+// ===== WebSocket 实时检测管理 =====
+
+/**
+ * Gemini WebSocket API 实例（全局单例）
+ */
+let geminiWSConnection = null;
+let wsConnectionStatus = {
+  isConnected: false,
+  lastError: null,
+  connectedAt: null
+};
+
+/**
+ * 启动实时检测 WebSocket 连接
+ */
+async function handleStartRealtimeDetection(settings, sendResponse) {
+  try {
+    console.log('[RealtimeWS] 启动 WebSocket 连接...');
+    
+    // 检查是否已连接
+    if (geminiWSConnection && wsConnectionStatus.isConnected) {
+      console.log('[RealtimeWS] WebSocket 已连接，复用现有连接');
+      sendResponse({ success: true, message: '已连接' });
+      return;
+    }
+
+    // 获取 API Key
+    const apiKey = settings.geminiApiKey || settings.apiKey;
+    if (!apiKey) {
+      throw new Error('未配置 Gemini API Key');
+    }
+
+    // 创建 WebSocket 连接（注意：Service Worker 中可以直接使用 WebSocket）
+    const wsUrl = `wss://generativelanguage.googleapis.com/ws/google.ai.generativelanguage.v1alpha.GenerativeService.BidiGenerateContent?key=${apiKey}`;
+    
+    geminiWSConnection = new WebSocket(wsUrl);
+    
+    // 设置连接超时
+    const connectionTimeout = setTimeout(() => {
+      if (!wsConnectionStatus.isConnected) {
+        geminiWSConnection.close();
+        throw new Error('WebSocket 连接超时');
+      }
+    }, 10000);
+
+    geminiWSConnection.onopen = () => {
+      clearTimeout(connectionTimeout);
+      console.log('[RealtimeWS] ✅ WebSocket 连接成功');
+      wsConnectionStatus.isConnected = true;
+      wsConnectionStatus.connectedAt = Date.now();
+      wsConnectionStatus.lastError = null;
+      
+      // 发送初始化设置
+      sendWSSetup(settings);
+      
+      sendResponse({ success: true, message: 'WebSocket 连接成功' });
+    };
+
+    geminiWSConnection.onerror = (error) => {
+      console.error('[RealtimeWS] ❌ WebSocket 错误:', error);
+      wsConnectionStatus.lastError = error.message || '连接错误';
+      
+      if (!wsConnectionStatus.isConnected) {
+        sendResponse({ success: false, error: '连接失败' });
+      }
+    };
+
+    geminiWSConnection.onclose = (event) => {
+      console.log(`[RealtimeWS] ⚠️ WebSocket 连接关闭 (code: ${event.code})`);
+      wsConnectionStatus.isConnected = false;
+      geminiWSConnection = null;
+    };
+
+    geminiWSConnection.onmessage = (event) => {
+      handleWSMessage(event.data);
+    };
+
+  } catch (error) {
+    console.error('[RealtimeWS] 启动失败:', error);
+    sendResponse({ success: false, error: error.message });
+  }
+}
+
+/**
+ * 发送 WebSocket 初始化设置
+ */
+function sendWSSetup(settings) {
+  const setupMessage = {
+    setup: {
+      model: 'models/gemini-2.0-flash-live-001',
+      generationConfig: {
+        temperature: 0.3,
+        topK: 20,
+        topP: 0.8,
+        maxOutputTokens: 256,
+        responseModalities: ["TEXT"]
+      },
+      systemInstruction: {
+        parts: [
+          {
+            text: `你是内容审核AI。快速判断文本是否有害。
+分类: safe|privacy|sensitive|harmful
+回复JSON: {"category":"...", "confidence":0-1, "reason":"..."}`
+          }
+        ]
+      }
+    }
+  };
+  
+  try {
+    geminiWSConnection.send(JSON.stringify(setupMessage));
+    console.log('[RealtimeWS] 📤 发送初始化设置');
+  } catch (error) {
+    console.error('[RealtimeWS] 发送设置失败:', error);
+  }
+}
+
+/**
+ * 处理 WebSocket 接收消息
+ */
+const wsPendingDetections = new Map(); // 存储待处理的检测请求
+let wsDetectionIdCounter = 0;
+
+function handleWSMessage(data) {
+  try {
+    const message = JSON.parse(data);
+    
+    // 设置完成确认
+    if (message.setupComplete) {
+      console.log('[RealtimeWS] ✅ 初始化完成');
+      return;
+    }
+
+    // 处理检测响应
+    if (message.serverContent?.modelTurn?.parts) {
+      const parts = message.serverContent.modelTurn.parts;
+      let responseText = '';
+
+      parts.forEach(part => {
+        if (part.text) {
+          responseText += part.text;
+        }
+      });
+
+      if (responseText) {
+        processWSDetectionResponse(responseText);
+      }
+    }
+
+  } catch (error) {
+    console.error('[RealtimeWS] 解析消息失败:', error);
+  }
+}
+
+/**
+ * 处理检测响应
+ */
+function processWSDetectionResponse(responseText) {
+  try {
+    // 提取检测ID
+    const idMatch = responseText.match(/ID[:：]\s*(\d+)/);
+    if (!idMatch) {
+      console.warn('[RealtimeWS] 无法提取检测ID');
+      return;
+    }
+
+    const id = parseInt(idMatch[1]);
+    const pending = wsPendingDetections.get(id);
+    
+    if (!pending) {
+      console.warn(`[RealtimeWS] 未找到待处理请求 #${id}`);
+      return;
+    }
+
+    // 解析 JSON 响应
+    const jsonMatch = responseText.match(/\{[\s\S]*"category"[\s\S]*\}/);
+    let result;
+
+    if (jsonMatch) {
+      result = JSON.parse(jsonMatch[0]);
+    } else {
+      // 降级：简单判断
+      result = {
+        category: responseText.includes('harmful') ? 'harmful' : 'safe',
+        confidence: 0.5,
+        reason: '降级解析'
+      };
+    }
+
+    // 添加响应时间
+    result.responseTime = Date.now() - pending.timestamp;
+
+    console.log(`[RealtimeWS] 📥 检测结果 #${id}: ${result.category} (${result.responseTime}ms)`);
+
+    // 调用回调
+    wsPendingDetections.delete(id);
+    if (pending.sendResponse) {
+      pending.sendResponse({ success: true, result });
+    }
+
+  } catch (error) {
+    console.error('[RealtimeWS] 处理响应失败:', error);
+  }
+}
+
+/**
+ * 通过 WebSocket 检测文本
+ */
+function handleDetectRealtimeText(request, sendResponse) {
+  if (!geminiWSConnection || !wsConnectionStatus.isConnected) {
+    sendResponse({ 
+      success: false, 
+      error: 'WebSocket 未连接' 
+    });
+    return;
+  }
+
+  const id = ++wsDetectionIdCounter;
+  const text = request.text;
+  
+  // 保存待处理请求
+  wsPendingDetections.set(id, {
+    sendResponse,
+    text,
+    timestamp: Date.now(),
+    metadata: request.metadata
+  });
+
+  // 发送检测请求
+  const message = {
+    clientContent: {
+      turns: [
+        {
+          role: "user",
+          parts: [
+            { 
+              text: `ID: ${id}\n${text}` 
+            }
+          ]
+        }
+      ],
+      turnComplete: true
+    }
+  };
+
+  try {
+    geminiWSConnection.send(JSON.stringify(message));
+    console.log(`[RealtimeWS] 📤 发送检测 #${id}: ${text.substring(0, 30)}...`);
+    
+    // 超时处理（5秒）
+    setTimeout(() => {
+      if (wsPendingDetections.has(id)) {
+        wsPendingDetections.delete(id);
+        sendResponse({ 
+          success: false, 
+          error: '检测超时',
+          result: { category: 'safe', confidence: 0 }
+        });
+      }
+    }, 5000);
+
+  } catch (error) {
+    console.error('[RealtimeWS] 发送失败:', error);
+    wsPendingDetections.delete(id);
+    sendResponse({ success: false, error: error.message });
+  }
+}
+
+/**
+ * 停止实时检测
+ */
+function handleStopRealtimeDetection(sendResponse) {
+  try {
+    if (geminiWSConnection) {
+      geminiWSConnection.close();
+      geminiWSConnection = null;
+      wsConnectionStatus.isConnected = false;
+      console.log('[RealtimeWS] 🛑 WebSocket 连接已关闭');
+    }
+    sendResponse({ success: true });
+  } catch (error) {
+    console.error('[RealtimeWS] 关闭失败:', error);
+    sendResponse({ success: false, error: error.message });
+  }
+}
+
 console.log('SafeGuard Background Service Worker 已启动');
+

@@ -133,6 +133,7 @@ async function loadSettings() {
     document.getElementById('detect-sensitive').checked = settings.detectSensitive !== false;
     document.getElementById('detect-harmful').checked = settings.detectHarmful !== false;
     document.getElementById('detect-images').checked = settings.detectImages !== false;
+    document.getElementById('enable-realtime-detection').checked = settings.enableRealtimeDetection || false;
     
     // 调试选项
     document.getElementById('enable-debug-logs').checked = settings.enableDebugLogs || false;
@@ -151,6 +152,10 @@ async function loadSettings() {
       document.getElementById('detection-delay').value = settings.detectionDelay;
     }
     document.getElementById('skip-small-images').checked = settings.skipSmallImages !== false;
+    
+    // 图片大小阈值 (KB转换)
+    const thresholdKB = (settings.smallImageThreshold || 50 * 1024) / 1024;
+    document.getElementById('image-threshold').value = thresholdKB.toString();
     
     console.log('✅ 设置加载完成');
   } catch (error) {
@@ -212,6 +217,21 @@ function setupEventListeners() {
   
   // 白名单管理
   document.getElementById('add-whitelist').addEventListener('click', addWhitelistDomain);
+  
+  // 跳过小图片开关 - 控制阈值选择器显示
+  document.getElementById('skip-small-images').addEventListener('change', (e) => {
+    const thresholdGroup = document.getElementById('image-threshold-group');
+    if (thresholdGroup) {
+      thresholdGroup.style.display = e.target.checked ? 'block' : 'none';
+    }
+  });
+  
+  // 初始化阈值选择器显示状态
+  const skipSmallImages = document.getElementById('skip-small-images').checked;
+  const thresholdGroup = document.getElementById('image-threshold-group');
+  if (thresholdGroup) {
+    thresholdGroup.style.display = skipSmallImages ? 'block' : 'none';
+  }
 }
 
 // 切换文本服务商配置区域
@@ -386,6 +406,7 @@ async function saveSettings() {
       detectSensitive: document.getElementById('detect-sensitive').checked,
       detectHarmful: document.getElementById('detect-harmful').checked,
       detectImages: document.getElementById('detect-images').checked,
+      enableRealtimeDetection: document.getElementById('enable-realtime-detection').checked,
       
       // 调试选项
       enableDebugLogs: document.getElementById('enable-debug-logs').checked,
@@ -396,7 +417,8 @@ async function saveSettings() {
       // 其他
       whitelist: getWhitelistDomains(),
       detectionDelay: parseInt(document.getElementById('detection-delay').value),
-      skipSmallImages: document.getElementById('skip-small-images').checked
+      skipSmallImages: document.getElementById('skip-small-images').checked,
+      smallImageThreshold: parseInt(document.getElementById('image-threshold').value) * 1024 // KB转Bytes
     };
     
     // 验证 API Keys

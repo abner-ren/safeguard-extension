@@ -18,6 +18,7 @@
 - **敏感内容检测**：识别色情、暴力、政治敏感话题
 - **有害信息检测**：识别赌博、诈骗、毒品、自残相关内容
 - **图片内容审核**：使用 Gemini Vision / 通义千问 Vision 进行多模态分析
+- **🆕 直播间实时检测**：使用 WebSocket API 实时监控和过滤直播弹幕中的有害消息
 
 ### 🛡️ 智能屏蔽
 
@@ -89,8 +90,10 @@
 1. **内容脚本** (`content.js`)：主要协调器 - 扫描 DOM（包括 Shadow DOM），聚合文本块，协调检测/屏蔽
 2. **后台服务工作进程** (`background.js`)：AI API 调用的 CORS 代理，设置管理，统计追踪
 3. **AI 提供商 API** (`utils/{gemini,qwen,deepseek}-api.js`)：模块化的 API 封装，带缓存和错误处理
-4. **内容检测器** (`utils/detector.js`)：将检测请求路由到相应的 AI 提供商
-5. **国际化系统** (`utils/i18n.js`)：自定义国际化系统，支持中文和英文
+4. **🆕 WebSocket API** (`utils/gemini-websocket-api.js`)：与 Gemini 的实时双向通信，用于直播弹幕检测
+5. **🆕 实时检测器** (`utils/realtime-detector.js`)：专门用于直播环境中流式内容的检测器
+6. **内容检测器** (`utils/detector.js`)：将检测请求路由到相应的 AI 提供商
+7. **国际化系统** (`utils/i18n.js`)：自定义国际化系统，支持中文和英文
 
 ### 检测流程
 
@@ -107,6 +110,7 @@ DOM/Shadow DOM → content.js → getTextBlocks() → detector.detectTextBatch()
 - **精准遮罩**：只屏蔽特定的有害片段，而非整个段落
 - **CORS 解决方案**：后台服务工作进程代理所有外部 API 请求
 - **弹窗检测**：识别并遮罩整个有害的模态弹窗
+- **🆕 实时 WebSocket**：双向流式传输，实现低延迟的直播弹幕内容审核
 
 ---
 
@@ -142,9 +146,11 @@ safeguard-extension/
 │   └── options.css
 ├── utils/                     # 工具模块
 │   ├── gemini-api.js         # Gemini API 封装
+│   ├── gemini-websocket-api.js  # 🆕 Gemini WebSocket API（实时检测）
 │   ├── qwen-api.js           # 通义千问 API 封装
 │   ├── deepseek-api.js       # DeepSeek API 封装
 │   ├── detector.js           # 检测协调器
+│   ├── realtime-detector.js  # 🆕 直播弹幕实时检测器
 │   ├── helpers.js            # 辅助函数
 │   ├── i18n.js               # 国际化
 │   └── logger.js             # 调试日志

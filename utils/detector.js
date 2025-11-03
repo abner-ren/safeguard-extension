@@ -186,7 +186,9 @@ class ContentDetector {
       // 检查图片大小（跳过小图片）
       if (this.settings.skipSmallImages && imgElement) {
         const size = await this._getImageSize(imgElement);
-        if (size < 100 * 1024) { // 小于 100KB
+        const threshold = this.settings.smallImageThreshold || 50 * 1024; // 默认50KB
+        if (size < threshold) {
+          console.log(`⏭️ 跳过小图片 (${(size / 1024).toFixed(1)}KB < ${(threshold / 1024).toFixed(0)}KB)`);
           return { isSafe: true, category: null, skipped: true };
         }
       }

@@ -18,6 +18,7 @@ English | **[简体中文](README.zh-CN.md)**
 - **Sensitive Content**: Detects sexual, violent, and politically sensitive topics
 - **Harmful Information**: Identifies gambling, scams, drugs, and self-harm related content
 - **Image Moderation**: Multimodal analysis using Gemini Vision / Qwen Vision
+- **🆕 Live Chat Detection**: Real-time monitoring and filtering of harmful messages in live streams using WebSocket API
 
 ### 🛡️ Smart Blocking
 
@@ -89,8 +90,10 @@ English | **[简体中文](README.zh-CN.md)**
 1. **Content Script** (`content.js`): Main orchestrator - scans DOM including Shadow DOM, aggregates text blocks, coordinates detection/blocking
 2. **Background Service Worker** (`background.js`): CORS proxy for AI API calls, settings management, statistics tracking
 3. **AI Provider APIs** (`utils/{gemini,qwen,deepseek}-api.js`): Modular API wrappers with caching and error handling
-4. **Content Detector** (`utils/detector.js`): Routes detection requests to appropriate AI providers
-5. **i18n System** (`utils/i18n.js`): Custom internationalization supporting Chinese and English
+4. **🆕 WebSocket API** (`utils/gemini-websocket-api.js`): Real-time bidirectional communication with Gemini for live chat detection
+5. **🆕 Real-time Detector** (`utils/realtime-detector.js`): Specialized detector for streaming content in live chat environments
+6. **Content Detector** (`utils/detector.js`): Routes detection requests to appropriate AI providers
+7. **i18n System** (`utils/i18n.js`): Custom internationalization supporting Chinese and English
 
 ### Detection Flow
 
@@ -107,6 +110,7 @@ DOM/Shadow DOM → content.js → getTextBlocks() → detector.detectTextBatch()
 - **Precision Masking**: Only blocks specific harmful fragments, not entire paragraphs
 - **CORS Workaround**: Background service worker proxies all external API requests
 - **Popup Detection**: Identifies and masks entire harmful modal popups
+- **🆕 Real-time WebSocket**: Bidirectional streaming for live chat content moderation with minimal latency
 
 ---
 
@@ -142,9 +146,11 @@ safeguard-extension/
 │   └── options.css
 ├── utils/                     # Utility modules
 │   ├── gemini-api.js         # Gemini API wrapper
+│   ├── gemini-websocket-api.js  # 🆕 Gemini WebSocket API for real-time detection
 │   ├── qwen-api.js           # Qwen API wrapper
 │   ├── deepseek-api.js       # DeepSeek API wrapper
 │   ├── detector.js           # Detection orchestrator
+│   ├── realtime-detector.js  # 🆕 Real-time detector for live chat
 │   ├── helpers.js            # Helper functions
 │   ├── i18n.js               # Internationalization
 │   └── logger.js             # Debug logging

@@ -307,13 +307,45 @@ let statistics = { // 统计数据
       detectSensitive: settings.detectSensitive !== false,
       detectHarmful: settings.detectHarmful !== false,
       detectImages: settings.detectImages !== false,
-      skipSmallImages: settings.skipSmallImages !== false
+      skipSmallImages: settings.skipSmallImages !== false,
+      
+      // 调试日志
+      enableDebugLogs: settings.enableDebugLogs || false,
+      logPrompts: settings.logPrompts !== false,
+      logResponses: settings.logResponses !== false,
+      logTiming: settings.logTiming !== false
     });
     console.log(`✅ ContentDetector 初始化成功`);
   } catch (error) {
     console.error('❌ ContentDetector 初始化失败:', error);
     showNotification('检测器初始化失败', 'error');
     return;
+  }
+  
+  // ===== 初始化实时检测器（WebSocket） =====
+  let realtimeDetector = null;
+  if (settings.enableRealtimeDetection) {
+    try {
+      console.log('🚀 正在初始化实时检测器...');
+      realtimeDetector = new RealtimeDetector({
+        enableRealtimeDetection: true,
+        geminiApiKey: settings.geminiApiKey || settings.apiKey,
+        enableDebugLogs: settings.enableDebugLogs || false
+      });
+      
+      // 启动 WebSocket 连接
+      const startResult = await realtimeDetector.start();
+      if (startResult) {
+        console.log('✅ 实时检测器启动成功');
+        
+        // 替换标准检测器为实时检测器（用于弹幕等场景）
+        window.realtimeDetector = realtimeDetector;
+      } else {
+        console.warn('⚠️ 实时检测器启动失败，将使用标准检测');
+      }
+    } catch (error) {
+      console.error('❌ 实时检测器初始化失败:', error);
+    }
   }
   
   if (isEnabled) {
@@ -386,14 +418,31 @@ async function scanPage() {
       try {
         const results = await detector.detectTextBatch(batch);
         
-        // 处理检测结果
-        results.forEach((result, index) => {
+        console.log(`📋 检测结果数组长度: ${results.length}, batch长度: ${batch.length}`);
+        
+        // 处理检测结果 - 使用 for 循环确保索引对齐
+        for (let index = 0; index < results.length; index++) {
+          const result = results[index];
+          
+          // 跳过 undefined 或 null 结果
+          if (!result) {
+            console.log(`⏭️ 索引 ${index}: 结果为空，跳过`);
+            continue;
+          }
+          
           if (result.shouldBlock) {
             const item = batch[index];
-            // 使用精确屏蔽：只屏蔽 {{}} 内的内容
-            blockTextElementPrecise(item.element, result);
+            if (item && item.element) {
+              console.log(`🔒 索引 ${index}: 准备屏蔽文本元素 (类别: ${result.category})`);
+              // 使用精确屏蔽：只屏蔽 {{}} 内的内容
+              blockTextElementPrecise(item.element, result);
+            } else {
+              console.warn(`⚠️ 索引 ${index}: batch[${index}] 缺少 element 属性`, item);
+            }
+          } else {
+            console.log(`✅ 索引 ${index}: 内容安全，不屏蔽 (类别: ${result.category || 'safe'})`);
           }
-        });
+        }
         
         console.log(`✅ 已处理 ${Math.min(i + batchSize, textItems.length)}/${textItems.length} 项`);
       } catch (error) {
@@ -814,6 +863,14 @@ function observeShadowRoot(shadowRoot) {
 
 // 添加到处理队列
 function queueForProcessing(element) {
+  // ===== 实时检测模式：立即处理弹幕等实时内容 =====
+  if (window.realtimeDetector && isRealtimeContent(element)) {
+    console.log('⚡ 实时检测模式：立即处理');
+    processRealtimeElement(element);
+    return; // 不添加到队列，立即处理
+  }
+  
+  // 标准模式：添加到批量处理队列
   processingQueue.push(element);
   
   // 使用防抖处理队列
@@ -821,6 +878,132 @@ function queueForProcessing(element) {
     isProcessing = true;
     setTimeout(processQueue, settings.detectionDelay || 1000);
   }
+}
+
+/**
+ * 判断是否为实时内容（弹幕、评论等）
+ * @param {Element} element - DOM元素
+ * @returns {boolean}
+ */
+function isRealtimeContent(element) {
+  const classNames = element.className || '';
+  const id = element.id || '';
+  const tagName = element.tagName?.toLowerCase() || '';
+  
+  // 弹幕相关类名和标签
+  const realtimePatterns = [
+    /danmaku|danmu|弹幕/i,           // 弹幕
+    /live-comment|直播评论/i,         // 直播评论
+    /chat-message|聊天消息/i,         // 聊天消息
+    /instant-comment|即时评论/i,      // 即时评论
+    /bullet-chat/i                   // 子弹评论（弹幕别名）
+  ];
+  
+  // 检查类名、ID 和标签名
+  const text = `${classNames} ${id} ${tagName}`;
+  return realtimePatterns.some(pattern => pattern.test(text));
+}
+
+/**
+ * 实时处理单个元素（低延迟）
+ * @param {Element} element - DOM元素
+ */
+async function processRealtimeElement(element) {
+  try {
+    const text = element.textContent?.trim();
+    if (!text || text.length < 3) return; // 过滤太短的文本
+    
+    // 使用实时检测器
+    const result = await window.realtimeDetector.detect(text, element, {
+      elementId: element.id || 'realtime-' + Date.now()
+    });
+    
+    if (result.shouldBlock) {
+      console.log(`⚡ 实时拦截 (${result.responseTime || 0}ms):`, text.substring(0, 30));
+      
+      // 实时检测使用整体屏蔽（因为没有 maskedText）
+      blockRealtimeElement(element, result);
+    }
+    
+  } catch (error) {
+    console.error('⚡ 实时检测失败:', error);
+  }
+}
+
+/**
+ * 屏蔽实时内容元素（整体隐藏或标记）
+ * @param {Element} element - DOM元素
+ * @param {Object} result - 检测结果
+ */
+function blockRealtimeElement(element, result) {
+  if (!element || blockedElements.has(element)) return;
+  
+  console.log('⚡ 屏蔽实时内容:', {
+    element: element.tagName,
+    category: result.category,
+    source: result.source
+  });
+  
+  // 方案1：完全隐藏元素（推荐用于弹幕）
+  element.style.display = 'none';
+  element.classList.add('safeguard-blocked-realtime');
+  
+  // 方案2：如果需要保留占位，使用遮罩
+  // const originalDisplay = element.style.display;
+  // element.style.filter = 'blur(10px)';
+  // element.style.opacity = '0.3';
+  // element.style.pointerEvents = 'none';
+  
+  // 添加提示标签（可选）
+  const badge = document.createElement('span');
+  badge.className = 'safeguard-realtime-badge';
+  badge.textContent = '🔒';
+  badge.style.cssText = `
+    position: absolute;
+    top: 0;
+    left: 0;
+    background: rgba(231, 76, 60, 0.9);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+    z-index: 9999;
+  `;
+  
+  // 如果元素有相对定位父元素，添加徽章
+  if (element.parentElement) {
+    element.parentElement.style.position = 'relative';
+    // element.parentElement.appendChild(badge);
+  }
+  
+  // 记录到 blockedElements
+  blockedElements.set(element, {
+    type: 'realtime',
+    category: result.category,
+    source: result.source,
+    timestamp: Date.now(),
+    originalText: element.textContent
+  });
+  
+  // 更新统计
+  statistics.total++;
+  if (result.category === 'privacy') statistics.privacy++;
+  else if (result.category === 'sensitive') statistics.sensitive++;
+  else if (result.category === 'harmful') statistics.harmful++;
+  
+  updateStatsDisplay(statistics.total);
+  
+  // 保存实时检测日志
+  saveRealtimeDetectionLog({
+    originalText: element.textContent.substring(0, 200),
+    category: result.category,
+    source: result.source,
+    responseTime: result.responseTime || 0,
+    url: window.location.href,
+    timestamp: Date.now()
+  });
+  
+  console.log('✅ 实时内容已屏蔽');
 }
 
 // 处理队列（新方法：使用批量检测）
@@ -1000,7 +1183,21 @@ function removeBlockMask(element) {
  * @param {Object} result - 检测结果 {maskedText: string, category: string}
  */
 function blockTextElementPrecise(element, result) {
-  if (!element || blockedElements.has(element)) return;
+  if (!element) {
+    console.warn('⚠️ blockTextElementPrecise: element 为空');
+    return;
+  }
+  
+  if (blockedElements.has(element)) {
+    console.warn('⚠️ 元素已被屏蔽，跳过:', {
+      element: element.tagName,
+      previousCategory: blockedElements.get(element).category,
+      newCategory: result.category,
+      elementId: element.id || '(无ID)',
+      elementClass: element.className || '(无class)'
+    });
+    return;
+  }
   
   console.log('🎯 精确屏蔽模式:', {
     element: element.tagName,
@@ -1053,16 +1250,32 @@ function blockTextElementPrecise(element, result) {
   });
   
   // 更新统计
+  const oldTotal = statistics.total;
   statistics.total++;
   if (result.category === 'privacy') statistics.privacy++;
   else if (result.category === 'sensitive') statistics.sensitive++;
   else if (result.category === 'harmful') statistics.harmful++;
+  
+  console.log(`📊 统计更新: ${oldTotal} → ${statistics.total} (类别: ${result.category})`);
+  
+  // 立即更新显示
+  updateStatsDisplay(statistics.total);
+  
+  // 保存日志
+  saveTextDetectionLog({
+    originalText: originalText.substring(0, 200), // 只保存前200字符
+    sensitiveParts: sensitiveParts,
+    category: result.category,
+    confidence: result.confidence || 0.8,
+    url: window.location.href,
+    timestamp: Date.now()
+  });
 }
 
 /**
  * 从 maskedText 中提取 {{}} 内的敏感内容
  * @param {string} maskedText - 带有 {{}} 标记的文本
- * @returns {Array<string>} 敏感内容数组
+ * @returns {Array<string>} 敏感内容数组（去重）
  */
 function extractSensitiveParts(maskedText) {
   const parts = [];
@@ -1073,7 +1286,8 @@ function extractSensitiveParts(maskedText) {
     parts.push(match[1]); // match[1] 是括号内的内容
   }
   
-  return parts;
+  // 去重：同一个敏感词可能在文本中多次出现
+  return [...new Set(parts)];
 }
 
 /**
@@ -1129,12 +1343,27 @@ function replaceTextInElement(element, sensitiveParts, category) {
     console.log(`\n🔍 处理敏感片段 ${partIndex + 1}/${sensitiveParts.length}: "${sensitive}"`);
     
     // 在合并文本中查找所有匹配位置
-    const matches = findAllMatches(mergedText, sensitive);
+    let matches = findAllMatches(mergedText, sensitive);
     
     if (matches.length === 0) {
       console.warn(`⚠️ 未找到 "${sensitive}"`);
       return;
     }
+    
+    // 为避免替换时节点结构被前面匹配修改，按起始位置从大到小处理
+    matches.sort((a, b) => b.start - a.start);
+    // 过滤掉重叠/相邻（共享字符）的匹配，防止对同一片段重复替换导致节点被多次移除
+    const filtered = [];
+    let lastStart = Infinity;
+    for (const m of matches) {
+      if (m.end <= lastStart) {
+        filtered.push(m);
+        lastStart = m.start;
+      } else {
+        console.log('  ↩︎ 跳过重叠匹配:', m);
+      }
+    }
+    matches = filtered;
     
     console.log(`✅ 找到 ${matches.length} 个匹配位置:`, matches);
     
@@ -1155,7 +1384,7 @@ function replaceTextInElement(element, sensitiveParts, category) {
       );
       
       // 替换这些节点
-      const replaced = replaceAcrossNodes(affectedNodes, match.text, category);
+  const replaced = replaceAcrossNodes(affectedNodes, match.text, category);
       
       if (replaced) {
         replacedCount++;
@@ -1649,10 +1878,11 @@ function updateStatsFromDetector() {
   
   const detectorStats = detector.getStatistics();
   
-  // 更新本地统计（仅更新差值）
-  statistics.total = blockedElements.size;
+  // ❌ 不要重置 statistics.total！
+  // 精确屏蔽模式下，statistics.total 在 blockTextElementPrecise() 中已经正确累加
+  // 这里只更新 blockedElements.size 作为参考（元素数量，不是屏蔽片段数量）
   
-  // 更新显示
+  // 更新显示（使用已累加的 statistics.total）
   updateStatsDisplay(statistics.total);
 }
 
@@ -1771,6 +2001,42 @@ setTimeout(() => {
     refreshAllMasksLocalization();
   }
 }, 1000);
+
+/**
+ * 保存文本检测日志
+ */
+function saveTextDetectionLog(data) {
+  chrome.runtime.sendMessage({
+    action: 'saveLog',
+    logEntry: {
+      type: 'text_detection',
+      result: data.category,
+      originalText: data.originalText,
+      sensitiveParts: data.sensitiveParts,
+      confidence: data.confidence,
+      url: data.url,
+      timestamp: data.timestamp
+    }
+  }).catch(err => console.error('保存文本日志失败:', err));
+}
+
+/**
+ * 保存实时检测日志
+ */
+function saveRealtimeDetectionLog(data) {
+  chrome.runtime.sendMessage({
+    action: 'saveLog',
+    logEntry: {
+      type: 'realtime_detection',
+      result: data.category,
+      originalText: data.originalText,
+      source: data.source,
+      responseTime: data.responseTime,
+      url: data.url,
+      timestamp: data.timestamp
+    }
+  }).catch(err => console.error('保存实时日志失败:', err));
+}
 
 console.log('SafeGuard Content Script 初始化完成');
 

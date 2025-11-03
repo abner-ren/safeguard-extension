@@ -6,7 +6,8 @@
   "permissions": [
     "storage",
     "activeTab",
-    "scripting"
+    "scripting",
+    "downloads"
   ],
   "host_permissions": [
     "<all_urls>",
@@ -27,6 +28,7 @@
         "utils/deepseek-api.js",
         "utils/qwen-api.js",
         "utils/detector.js",
+        "utils/realtime-detector.js",
         "content.js"
       ],
       "css": ["styles/content.css"],

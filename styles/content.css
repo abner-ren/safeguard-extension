@@ -425,3 +425,23 @@
   background: #2A5F9C;
 }
 
+/* 实时内容屏蔽样式 */
+.safeguard-blocked-realtime {
+  /* 完全隐藏实时有害内容（弹幕、评论等） */
+  display: none !important;
+}
+
+.safeguard-realtime-badge {
+  /* 实时内容屏蔽徽章 */
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: rgba(231, 76, 60, 0.9);
+  color: white;
+  padding: 2px 6px;
+  border-radius: 3px;
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 9999;
+  pointer-events: none;
+}

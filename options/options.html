@@ -210,6 +210,12 @@
             <span data-i18n="options.detectImages">🖼️ Detect Image Content</span>
             <small data-i18n="options.detectImagesDesc">Moderate image content</small>
           </label>
+          
+          <label class="checkbox-label">
+            <input type="checkbox" id="enable-realtime-detection">
+            <span data-i18n="options.enableRealtimeDetection">⚡ Realtime Detection Mode (Experimental)</span>
+            <small data-i18n="options.enableRealtimeDetectionDesc">Use WebSocket for low-latency detection of live comments and danmaku</small>
+          </label>
         </div>
       </section>
       
@@ -243,8 +249,19 @@
           <label class="checkbox-label">
             <input type="checkbox" id="skip-small-images" checked>
             <span data-i18n="options.skipSmallImages">Skip Small Images</span>
-            <small data-i18n="options.skipSmallImagesDesc">Do not detect images smaller than 100KB to improve performance</small>
+            <small data-i18n="options.skipSmallImagesDesc">Do not detect images smaller than the threshold to improve performance</small>
           </label>
+        </div>
+
+        <div class="form-group" id="image-threshold-group">
+          <label for="image-threshold" data-i18n="options.imageThreshold">Image Size Threshold</label>
+          <select id="image-threshold">
+            <option value="30" data-i18n-value="options.threshold30kb">30 KB (Icons only)</option>
+            <option value="50" selected data-i18n-value="options.threshold50kb">50 KB (Recommended)</option>
+            <option value="100" data-i18n-value="options.threshold100kb">100 KB (Conservative)</option>
+            <option value="200" data-i18n-value="options.threshold200kb">200 KB (Very conservative)</option>
+          </select>
+          <small class="help-text" data-i18n="options.imageThresholdDesc">Images smaller than this will not be checked. 50KB balances performance and accuracy.</small>
         </div>
       </section>
     </main>

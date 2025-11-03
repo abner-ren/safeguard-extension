@@ -8,6 +8,8 @@ let filteredLogs = [];
 
 // 页面加载完成
 document.addEventListener('DOMContentLoaded', async () => {
+  // 等待 i18n 初始化
+  await i18n.init();
   await loadLogs();
   setupEventListeners();
 });
@@ -22,7 +24,7 @@ async function loadLogs() {
     updateStats();
   } catch (error) {
     console.error('加载日志失败:', error);
-    showError('加载日志失败: ' + error.message);
+    showError(i18n.t('viewer.loadError') + ': ' + error.message);
   }
 }
 
@@ -47,8 +49,8 @@ function displayLogs() {
   if (filteredLogs.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
-        <div class="empty-state-icon">📭</div>
-        <div class="empty-state-text">没有符合条件的日志</div>
+        <div class="empty-state-icon">${i18n.t('viewer.emptyStateIcon')}</div>
+        <div class="empty-state-text">${i18n.t('viewer.noMatchingLogs')}</div>
       </div>
     `;
     return;
@@ -61,39 +63,100 @@ function displayLogs() {
 function createLogEntryHTML(log) {
   const isError = log.error || log.result === 'error';
   const resultBadge = getResultBadge(log.result);
-  const time = new Date(log.timestamp).toLocaleString('zh-CN');
+  const time = new Date(log.timestamp).toLocaleString();
 
   let detailsHTML = '';
   
   if (log.type === 'image_detection') {
     detailsHTML = `
       <div class="log-details">
-        <div class="log-detail">
-          <span class="log-detail-label">图片URL:</span>
-          <span class="log-detail-value">${truncate(log.imageUrl || 'N/A', 60)}</span>
+        <div class="log-detail" style="grid-column: 1/-1;">
+          <span class="log-detail-label">${i18n.t('viewer.imageUrl')}</span>
+          <span class="log-detail-value" style="word-break: break-all;">
+            <a href="${log.imageUrl || '#'}" target="_blank" style="color: #667eea;">
+              ${truncate(log.imageUrl || 'N/A', 100)}
+            </a>
+          </span>
         </div>
+        ${log.imageUrl ? `
+          <div class="log-detail" style="grid-column: 1/-1;">
+            <img src="${log.imageUrl}" 
+                 class="image-preview image-thumbnail" 
+                 alt="Image Preview"
+                 onclick="showImageModal('${log.imageUrl.replace(/'/g, "\\'")}')"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+            <span style="display:none; color: #dc3545;">❌ 图片加载失败</span>
+          </div>
+        ` : ''}
         <div class="log-detail">
-          <span class="log-detail-label">结果:</span>
+          <span class="log-detail-label">${i18n.t('viewer.result')}</span>
           ${resultBadge}
         </div>
         <div class="log-detail">
-          <span class="log-detail-label">置信度:</span>
-          <span class="log-detail-value">${(log.confidence * 100).toFixed(1)}%</span>
+          <span class="log-detail-label">${i18n.t('viewer.confidence')}</span>
+          <span class="log-detail-value">${((log.confidence || 0) * 100).toFixed(1)}%</span>
         </div>
         <div class="log-detail">
-          <span class="log-detail-label">提供商:</span>
+          <span class="log-detail-label">${i18n.t('viewer.provider')}</span>
           <span class="log-detail-value">${log.provider || 'N/A'}</span>
         </div>
         <div class="log-detail">
-          <span class="log-detail-label">处理时间:</span>
+          <span class="log-detail-label">${i18n.t('viewer.processingTime')}</span>
           <span class="log-detail-value">${log.processingTime || 'N/A'}ms</span>
         </div>
         ${log.error ? `
           <div class="log-detail" style="grid-column: 1/-1;">
-            <span class="log-detail-label">错误:</span>
+            <span class="log-detail-label">${i18n.t('viewer.error')}</span>
             <span class="log-detail-value" style="color: #dc3545;">${log.error}</span>
           </div>
         ` : ''}
+      </div>
+    `;
+  } else if (log.type === 'text_detection') {
+    detailsHTML = `
+      <div class="log-details">
+        <div class="log-detail" style="grid-column: 1/-1;">
+          <span class="log-detail-label">${i18n.t('viewer.originalText')}</span>
+          <span class="log-detail-value" style="white-space: pre-wrap;">${truncate(log.originalText || 'N/A', 200)}</span>
+        </div>
+        ${log.sensitiveParts && log.sensitiveParts.length > 0 ? `
+          <div class="log-detail" style="grid-column: 1/-1;">
+            <span class="log-detail-label">${i18n.t('viewer.sensitiveParts')}</span>
+            <span class="log-detail-value" style="color: #dc3545; font-weight: 600;">
+              ${log.sensitiveParts.map(part => `"${part}"`).join(', ')}
+            </span>
+          </div>
+        ` : ''}
+        <div class="log-detail">
+          <span class="log-detail-label">${i18n.t('viewer.result')}</span>
+          ${resultBadge}
+        </div>
+        <div class="log-detail">
+          <span class="log-detail-label">${i18n.t('viewer.confidence')}</span>
+          <span class="log-detail-value">${((log.confidence || 0) * 100).toFixed(1)}%</span>
+        </div>
+      </div>
+    `;
+  } else if (log.type === 'realtime_detection') {
+    const sourceLabel = getSourceLabel(log.source);
+    detailsHTML = `
+      <div class="log-details">
+        <div class="log-detail" style="grid-column: 1/-1;">
+          <span class="log-detail-label">${i18n.t('viewer.originalText')}</span>
+          <span class="log-detail-value" style="white-space: pre-wrap;">${truncate(log.originalText || 'N/A', 200)}</span>
+        </div>
+        <div class="log-detail">
+          <span class="log-detail-label">${i18n.t('viewer.result')}</span>
+          ${resultBadge}
+        </div>
+        <div class="log-detail">
+          <span class="log-detail-label">${i18n.t('viewer.source')}</span>
+          <span class="log-detail-value">${sourceLabel}</span>
+        </div>
+        <div class="log-detail">
+          <span class="log-detail-label">${i18n.t('viewer.responseTime')}</span>
+          <span class="log-detail-value">${log.responseTime || 0}ms</span>
+        </div>
       </div>
     `;
   }
@@ -112,20 +175,31 @@ function createLogEntryHTML(log) {
 // 获取类型标签
 function getTypeLabel(type) {
   const labels = {
-    'image_detection': '🖼️ 图片检测',
-    'text_detection': '📝 文本检测'
+    'image_detection': i18n.t('viewer.labelImageDetection'),
+    'text_detection': i18n.t('viewer.labelTextDetection'),
+    'realtime_detection': i18n.t('viewer.labelRealtimeDetection')
   };
   return labels[type] || type;
+}
+
+// 获取来源标签
+function getSourceLabel(source) {
+  const labels = {
+    'local': i18n.t('viewer.sourceLocal'),
+    'websocket': i18n.t('viewer.sourceWebSocket'),
+    'http': i18n.t('viewer.sourceHTTP')
+  };
+  return labels[source] || source || 'N/A';
 }
 
 // 获取结果徽章
 function getResultBadge(result) {
   const badges = {
-    'safe': '<span class="badge badge-success">✅ 安全</span>',
-    'privacy': '<span class="badge badge-warning">🔒 隐私</span>',
-    'sensitive': '<span class="badge badge-warning">⚠️ 敏感</span>',
-    'harmful': '<span class="badge badge-danger">🚫 有害</span>',
-    'error': '<span class="badge badge-danger">❌ 错误</span>'
+    'safe': `<span class="badge badge-success">${i18n.t('viewer.badgeSafe')}</span>`,
+    'privacy': `<span class="badge badge-warning">${i18n.t('viewer.badgePrivacy')}</span>`,
+    'sensitive': `<span class="badge badge-warning">${i18n.t('viewer.badgeSensitive')}</span>`,
+    'harmful': `<span class="badge badge-danger">${i18n.t('viewer.badgeHarmful')}</span>`,
+    'error': `<span class="badge badge-danger">${i18n.t('viewer.badgeError')}</span>`
   };
   return badges[result] || `<span class="badge badge-info">${result}</span>`;
 }
@@ -143,10 +217,12 @@ function updateStats() {
   
   const imageLogs = allLogs.filter(log => log.type === 'image_detection').length;
   const textLogs = allLogs.filter(log => log.type === 'text_detection').length;
+  const realtimeLogs = allLogs.filter(log => log.type === 'realtime_detection').length;
   const errorLogs = allLogs.filter(log => log.error || log.result === 'error').length;
   
   document.getElementById('image-logs').textContent = imageLogs;
   document.getElementById('text-logs').textContent = textLogs;
+  document.getElementById('realtime-logs').textContent = realtimeLogs;
   document.getElementById('error-logs').textContent = errorLogs;
 }
 
@@ -155,21 +231,21 @@ function setupEventListeners() {
   // 刷新按钮
   document.getElementById('refresh-btn').addEventListener('click', async () => {
     await loadLogs();
-    showNotification('日志已刷新');
+    showNotification(i18n.t('viewer.refreshSuccess'));
   });
 
   // 清空日志按钮
   document.getElementById('clear-btn').addEventListener('click', async () => {
-    if (!confirm('确定要清空所有日志吗？此操作不可恢复！')) {
+    if (!confirm(i18n.t('viewer.clearConfirm'))) {
       return;
     }
     
     try {
       await chrome.storage.local.set({ logs: [] });
       await loadLogs();
-      showNotification('日志已清空');
+      showNotification(i18n.t('viewer.clearSuccess'));
     } catch (error) {
-      showError('清空日志失败: ' + error.message);
+      showError(i18n.t('viewer.clearError') + ': ' + error.message);
     }
   });
 
@@ -181,12 +257,12 @@ function setupEventListeners() {
       });
       
       if (response.success) {
-        showNotification('日志下载成功');
+        showNotification(i18n.t('viewer.downloadSuccess'));
       } else {
-        showError(response.error || '下载失败');
+        showError(response.error || i18n.t('viewer.downloadError'));
       }
     } catch (error) {
-      showError('下载日志失败: ' + error.message);
+      showError(i18n.t('viewer.downloadError') + ': ' + error.message);
     }
   });
 
@@ -205,6 +281,26 @@ function setupEventListeners() {
     applyFilters();
     displayLogs();
   });
+
+  // 图片模态框关闭
+  document.getElementById('modal-close').addEventListener('click', () => {
+    document.getElementById('image-modal').classList.remove('active');
+  });
+
+  // 点击模态框背景关闭
+  document.getElementById('image-modal').addEventListener('click', (e) => {
+    if (e.target.id === 'image-modal') {
+      document.getElementById('image-modal').classList.remove('active');
+    }
+  });
+}
+
+// 显示图片模态框
+function showImageModal(imageUrl) {
+  const modal = document.getElementById('image-modal');
+  const modalImage = document.getElementById('modal-image');
+  modalImage.src = imageUrl;
+  modal.classList.add('active');
 }
 
 // 显示通知

@@ -7,6 +7,8 @@ class I18n {
   constructor() {
     this.messages = {};
     this.currentLanguage = 'en';
+    // 标记是否已成功加载语言文件，避免初始化早期的缺失键告警
+    this._initialized = false;
   }
 
   /**
@@ -29,6 +31,7 @@ class I18n {
       const response = await fetch(chrome.runtime.getURL(`i18n/${lang}.json`));
       this.messages = await response.json();
       this.currentLanguage = lang;
+      this._initialized = true;
     } catch (error) {
       console.error('Failed to load language file:', error);
       // 如果加载失败，尝试加载英文作为后备
@@ -44,6 +47,11 @@ class I18n {
    * @param {object} params - 替换参数
    */
   t(key, params = {}) {
+    // 若尚未完成初始化，不进行缺失键告警，直接返回原键，待 i18n-ready 后由刷新流程统一更新
+    if (!this._initialized || !this.messages || Object.keys(this.messages).length === 0) {
+      return key;
+    }
+
     const keys = key.split('.');
     let value = this.messages;
     
